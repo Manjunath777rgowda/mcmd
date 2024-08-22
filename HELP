@@ -1,0 +1,11 @@
+
+Usage:  mcmd COMMAND
+
+COMMAND
+
+- create: Create a new custom command.
+- remove: Remove an existing custom command.
+- help: Show this help message.
+- list: Lists the custom commands
+- <command>: Execute the specified custom command. eg : 'mcmd login'
+

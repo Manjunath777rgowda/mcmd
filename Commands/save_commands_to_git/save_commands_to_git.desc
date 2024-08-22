@@ -1,0 +1,1 @@
+This script push all the custom command files to a specified Git repository, commits the changes with a user-provided message, and pushes them to the remote repository.
