@@ -1,71 +1,89 @@
-# mcmd Project
+# mcmd
 
-## Overview
+`mcmd` is a Python application designed to help you create, manage, and execute custom shell commands easily.
 
-`mcmd` is a tool designed to help manage custom commands. It allows users to create, remove, update, list, and execute commands stored in a specific directory. The commands are stored as shell scripts with associated description files.
+## Uninstalling mcmd
 
-## Features
+If you have an existing installation of `mcmd`, you can uninstall it with the following command:
 
-- **Create Commands**: Add new commands with custom logic.
-- **Remove Commands**: Delete existing commands.
-- **Update Commands**: Modify existing commands and their descriptions.
-- **List Commands**: View all available commands.
-- **Execute Commands**: Run custom commands directly from the terminal.
-- **Help**: Display help information for using `mcmd`.
+```bash
+pip uninstall mcmd
+```
 
-## Setup
+## Installing mcmd
 
-To set up the `mcmd` tool, follow these steps:
+To install the latest version of `mcmd` directly from the GitHub repository, use the following command:
 
-1. **Download the Setup Script**
+```bash
+pip install git+https://github.com/Manjunath777rgowda/mcmd.git
+```
 
-   Download the `setup.sh` script using `curl`:
+## Usage
 
-   ```bash
-   curl -o setup.sh https://raw.githubusercontent.com/Manjunath777rgowda/mcmd/main/setup.sh
-   ```
+Once installed, you can use the `mcmd` command. Below is the help message for `mcmd`:
 
-   Or use `wget`:
+```bash
+mcmd --help
+```
 
-   ```bash
-   wget -O setup.sh https://raw.githubusercontent.com/Manjunath777rgowda/mcmd/main/setup.sh
-   ```
+```plaintext
+Usage: mcmd [OPTIONS] COMMAND [ARGS]...
 
-2. **Make the Script Executable**
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────╮
+│ --install-completion          Install completion for the current shell.                     │
+│ --show-completion             Show completion for the current shell, to copy it or          │
+│                               customize the installation.                                   │
+│ --help                        Show this message and exit.                                   │
+╰─────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ──────────────────────────────────────────────────────────────────────────────────╮
+│ create   Create or update a custom command.                                                 │
+│ exec     Entry point to execute custom commands if no other command is specified.           │
+│ list     List all custom commands.                                                          │
+│ remove   Remove a custom command.                                                           │
+╰─────────────────────────────────────────────────────────────────────────────────────────────╯
+```
 
-   Change the permissions of the `setup.sh` script to make it executable:
+### Command Descriptions
 
-   ```bash
-   chmod +x setup.sh
-   ```
+- **create**: Create or update a custom command.
 
-3. **Run the Setup Script**
+  ```bash
+  mcmd create <command_name>
+  ```
 
-   Execute the `setup.sh` script to configure `mcmd`:
+- **exec**: Execute a custom command if no other command is specified.
 
-   ```bash
-   ./setup.sh
-   ```
+  ```bash
+  mcmd exec <command_name> [args...]
+  ```
 
-   This script will install prerequisites, set up environment variables, and configure `mcmd`.
+- **list**: List all custom commands.
 
-## Commands
+  ```bash
+  mcmd list
+  ```
 
-- **Create Command**: `mcmd create` - Prompts for command name and logic, creates a new command.
-- **Remove Command**: `mcmd remove` - Lists existing commands and removes the selected one.
-- **Update Command**: `mcmd update` - Updates the logic and description of an existing command.
-- **List Commands**: `mcmd` - Lists all available commands.
-- **Execute Command**: `mcmd <command>` - Executes a specified command.
-- **Help**: `mcmd help` - Displays help information.
+- **remove**: Remove a custom command.
 
-## Directory Structure
+  ```bash
+  mcmd remove
+  ```
 
-- **Commands Directory**: Stores command scripts and their descriptions.
-- **HELP**: Contains help documentation.
-- **README.md**: This file.
-- **mcmd**: The main executable script.
-- **setup.sh**: The setup script for installing and configuring `mcmd`.
+## Troubleshooting
+
+If you encounter issues with `mcmd`, try the following:
+
+1. Ensure that the installation directory is in your `PATH`.
+2. If using a virtual environment, make sure it's activated.
+3. Reinstall the package if necessary.
 
 ## Contributing
 
-If you have any improvements or bug fixes, feel free to submit a pull request or open an issue on the GitHub repository.
+Contributions are welcome! Feel free to fork the repository, make improvements, and submit a pull request. Issues and feature requests are also encouraged.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+```
+
+This `README.md` provides clear instructions based on the `mcmd --help` command, making it easy for users to understand how to work with `mcmd`.
