@@ -9,7 +9,7 @@ class CustomInstallCommand(install):
         super().run()
 
         # Define source and destination directories
-        src_dir = 'Commands'
+        src_dir = 'sample_comands'
         dest_dir = os.path.expanduser('~/.mcmd_commands')
 
         # Create destination directory if it doesn't exist
