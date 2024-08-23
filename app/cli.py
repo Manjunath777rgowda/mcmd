@@ -6,14 +6,13 @@ import subprocess
 import typer
 from rich.console import Console
 from rich.table import Table
-from typing import List
+from typing import List, Optional
 
 app = typer.Typer()
 console = Console()
 
 # Define the commands directory relative to the current script's location
-MCMD_COMMANDS_DIR = os.getenv("MCMD_COMMANDS_DIR", os.path.expanduser("~/.mcmd_commands"))
-HELP_FILE = os.path.join(os.path.dirname(__file__), 'HELP')
+MCMD_COMMANDS_DIR = os.path.expanduser("~/.mcmd_commands")
 
 def is_valid_command_name(command_name):
     # Simple validation: only allows alphanumeric characters and underscores
@@ -135,22 +134,23 @@ def list_commands():
                 if os.path.exists(desc_file):
                     with open(desc_file, 'r') as file:
                         description = file.read().strip()
-                table.add_row(f"mcmd {cmd}", description)
+                table.add_row(f"mcmd exec {cmd}", description)
             console.print(table)
         else:
             console.print("No commands found.")
     else:
         console.print("Commands directory does not exist.")
 
-def execute_command(command_name: str ,args: List[str]):
-    # command_name = args[0]
+def execute_command(command_name: str, args):
+    if args is None:
+        args = []
+
     command_file = os.path.join(MCMD_COMMANDS_DIR, command_name, f"{command_name}.sh")
     
     if os.path.exists(command_file):
         subprocess.run([command_file] + args)
     else:
         print(f"Command 'mcmd {command_name}' not found.")
-
 
 @app.command()
 def create():
@@ -169,19 +169,22 @@ def remove():
 
 @app.command()
 def exec(
-    command_name : str,
-    args: List[str]  # Use *args to capture any number of additional arguments
+    command_name: str,
+    args: Optional[List[str]] = typer.Argument(None, help="Arguments for the command")
 ):
     """
     Entry point to execute custom commands if no other command is specified.
     """
-    if args:
+    print("exec invoked")  # Debug print
+    if command_name:
         if is_valid_command_name(command_name):
-            execute_command(command_name,args)
+            # If args is None, set it to an empty list
+            execute_command(command_name, args)
         else:
             print("Invalid command name. Command names should only contain alphanumeric characters and underscores.")
     else:
         print("No command provided. Use --help for options.")
+
 
 if __name__ == "__main__":
     app()

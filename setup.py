@@ -1,4 +1,5 @@
 from setuptools import setup, find_packages
+from install_scripts import CustomInstallCommand
 
 setup(
     name="mcmd",
@@ -9,7 +10,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "mcmd=mcmd.cli:app",
+            "mcmd=app.cli:app",
         ],
     },
     classifiers=[
@@ -17,4 +18,7 @@ setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
+    cmdclass={
+        'install': CustomInstallCommand,
+    },
 )
