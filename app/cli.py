@@ -147,10 +147,16 @@ def execute_command(command_name: str, args):
 
     command_file = os.path.join(MCMD_COMMANDS_DIR, command_name, f"{command_name}.sh")
     
-    if os.path.exists(command_file):
-        subprocess.run([command_file] + args)
-    else:
-        print(f"Command 'mcmd {command_name}' not found.")
+    try:
+        if os.path.exists(command_file):
+            subprocess.run([command_file] + args, check=True)
+        else:
+            console.print(f"[bold red]Command 'mcmd {command_name}' not found.[/bold red]")
+    except subprocess.CalledProcessError as e:
+        console.print(f"[bold red]Error executing command '{command_name}': {e}[/bold red]")
+    except Exception as e:
+        console.print(f"[bold red]An unexpected error occurred: {e}[/bold red]")
+        console.print(f"[bold yello]Ensure the sebang is added. if not add it at the beggining of the file (#!/bin/bash)[/bold yello]")
 
 @app.command()
 def create():
@@ -175,7 +181,6 @@ def exec(
     """
     Entry point to execute custom commands if no other command is specified.
     """
-    print("exec invoked")  # Debug print
     if command_name:
         if is_valid_command_name(command_name):
             # If args is None, set it to an empty list
