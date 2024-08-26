@@ -1,0 +1,11 @@
+This shell script automates the process of committing and pushing changes to a Git repository. It performs the following steps:
+
+Check for Unversioned Files: The script checks if there are any unversioned files in the working directory using git status --porcelain. Unversioned files are those that are not being tracked by Git.
+
+Prompt for Confirmation: If unversioned files are found, the script lists them and prompts the user to confirm whether they want to add these files to the staging area. The user can choose to add all unversioned files or abort the process.
+
+Add Unversioned Files: If the user confirms, the script adds each unversioned file to the Git staging area using git add.
+
+Commit Changes: The script prompts the user to enter a commit message. If the commit message is provided, it creates a new commit with the specified message.
+
+Push Changes: Finally, the script pushes the committed changes to the remote repository.
