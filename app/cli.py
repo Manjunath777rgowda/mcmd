@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 
 import os
-import sys
 import subprocess
 import typer
+import shutil
 from rich.console import Console
 from rich.table import Table
 from typing import List, Optional
+from .log_util import Log
 
 app = typer.Typer()
 console = Console()
+log = Log()
 
 # Define the commands directory relative to the current script's location
 MCMD_COMMANDS_DIR = os.path.expanduser("~/.mcmd_commands")
@@ -18,15 +20,43 @@ def is_valid_command_name(command_name):
     # Simple validation: only allows alphanumeric characters and underscores
     return command_name.isidentifier()
 
+def get_input(message):
+    """
+    Display a message in blue and read the user's input.
+
+    Args:
+        message (str): The prompt message to display.
+
+    Returns:
+        str: The user's input.
+    """
+    blue_color = '\033[94m'
+    reset_color = '\033[0m'
+    
+    # Print the message in blue color and read the input
+    user_input = input(f"{blue_color}{message}{reset_color}")
+    return user_input
+
+def add_shebang_if_missing(file_path):
+    # Check if the file has a .sh extension and add a shebang if missing
+    if file_path.endswith('.sh'):
+        with open(file_path, 'r+') as file:
+            lines = file.readlines()
+            if not lines or not lines[0].startswith('#!'):
+                file.seek(0, 0)
+                file.write('#!/bin/bash\n' + ''.join(lines))
+                file.flush()
+                log.info(f"Added shebang to '{file_path}'.")
+
 def create_or_update_command():
-    command_name = input("Enter the command name: mcmd ")
+    command_name = get_input("Enter the command name: mcmd exec ")
 
     # Validate the command name
     if not is_valid_command_name(command_name):
-        print("Invalid command name. Command names should only contain alphanumeric characters and underscores.")
+        log.error("Invalid command name. Command names should only contain alphanumeric characters and underscores.")
         return
 
-    command_description = input(f"Enter a description for 'mcmd {command_name}': ")
+    command_description = get_input(f"Enter a description for 'mcmd exec {command_name}': ")
 
     # Define paths for command logic and description files
     command_dir = os.path.join(MCMD_COMMANDS_DIR, command_name)
@@ -37,38 +67,60 @@ def create_or_update_command():
     
     # Check if the command exists
     if os.path.exists(command_file):
-        print(f"Command 'mcmd {command_name}' already exists.")
+        log.warn(f"Command 'mcmd {command_name}' already exists.")
         while True:
-            response = input("Do you want to update it? (y/n): ").lower()
+            response = get_input("Do you want to update it? (y/n): ").lower()
             if response == 'y':
-                print(f"Updating command 'mcmd {command_name}'.")
+                log.info(f"Updating command 'mcmd {command_name}'.")
+                accept_command_details("update", command_file, command_name)
                 break
             elif response == 'n':
-                print("Command update canceled.")
+                log.info("Command update canceled.")
                 return
             else:
-                print("Invalid input. Please enter 'y' or 'n'.")
+                log.error("Invalid input. Please enter 'y' or 'n'.")
                 continue
     else:
-        print(f"Creating new command 'mcmd {command_name}'.")
+        log.error(f"Command 'mcmd {command_name}' does not exist.")
+        log.info(f"Creating new command 'mcmd {command_name}'.")
+        accept_command_details("create", command_file, command_name)
 
     try:
-        # Open vi editor for editing the command logic
-        print(f"Opening vi editor for 'mcmd {command_name}' command logic...")
-        subprocess.run(['vi', command_file])
-        
         # Save the command description
         with open(description_file, 'w') as file:
             file.write(command_description + "\n")
         
         os.chmod(command_file, 0o755)
-        print(f"Command 'mcmd {command_name}' updated successfully.")
     except Exception as e:
-        print(f"Error creating/updating command: {e}")
+        log.error(f"Error creating/updating command: {e}")
+
+def accept_command_details(operation, command_file, command_name):
+    while True:
+        response = get_input("Do you already have the path for the command logic file? (y/n): ").lower()
+        if response == 'y':
+            existing_file_path = get_input("Enter the path of the file you want to use as the command logic: ")
+            if os.path.exists(existing_file_path):
+                subprocess.run(['cp', existing_file_path, command_file])
+                add_shebang_if_missing(command_file)
+                log.info(f"Command 'mcmd {command_name}' {operation}d with the contents of {existing_file_path}.")
+            else:
+                log.error(f"File '{existing_file_path}' does not exist. Command {operation} canceled.")
+            break
+        elif response == 'n':
+            log.info(f"Opening vi editor for 'mcmd {command_name}' command logic...")
+            try:
+                subprocess.run(['vi', command_file])
+                add_shebang_if_missing(command_file)
+                log.info(f"Command 'mcmd {command_name}' {operation}d successfully.")
+            except Exception as e:
+                log.error(f"Error opening vi editor: {e}")
+            break
+        else:
+            log.error("Invalid input. Please enter 'y' or 'n'.")
 
 def remove_command():
     if not os.path.exists(MCMD_COMMANDS_DIR):
-        print("No commands found.")
+        log.error("No commands found.")
         return
 
     # Collect commands from subfolders
@@ -83,16 +135,16 @@ def remove_command():
                 command_items.append((command_name, relative_path))
 
     if not command_items:
-        print("No commands found.")
+        log.error("No commands found.")
         return
 
     # Display commands with their relative paths
-    print("Existing commands:")
+    log.info("Existing commands:")
     for idx, (cmd_name, rel_path) in enumerate(command_items, start=1):
         print(f"  {idx}. mcmd {cmd_name}")
 
     try:
-        choice = int(input("Enter the number of the command to remove: "))
+        choice = int(get_input("Enter the number of the command to remove: "))
         if 1 <= choice <= len(command_items):
             command_name, command_path = command_items[choice - 1]
             command_dir = os.path.dirname(os.path.join(MCMD_COMMANDS_DIR, command_path))
@@ -111,19 +163,19 @@ def remove_command():
                 else:
                     break
 
-            print(f"Command 'mcmd {command_name}' removed successfully.")
+            log.info(f"Command 'mcmd {command_name}' removed successfully.")
         else:
-            print("Invalid choice. No command removed.")
+            log.error("Invalid choice. No command removed.")
     except ValueError:
-        print("Invalid input. Please enter a number.")
+        log.error("Invalid input. Please enter a number.")
     except Exception as e:
-        print(f"Error removing command: {e}")
+        log.error(f"Error removing command: {e}")
         
 def list_commands():
     if os.path.exists(MCMD_COMMANDS_DIR):
         subfolders = [f for f in os.listdir(MCMD_COMMANDS_DIR) if os.path.isdir(os.path.join(MCMD_COMMANDS_DIR, f))]
         if subfolders:
-            console.print("[bold yellow]CUSTOM COMMANDS:[/bold yellow]")
+            log.warn("CUSTOM COMMANDS:")
             table = Table(show_header=True, header_style="bold blue")
             table.add_column("Command", style="dim")
             table.add_column("Description")
@@ -134,12 +186,16 @@ def list_commands():
                 if os.path.exists(desc_file):
                     with open(desc_file, 'r') as file:
                         description = file.read().strip()
+                
+                if len(description) > 200:
+                    description = description[:200] + "..."
+                
                 table.add_row(f"mcmd exec {cmd}", description)
             console.print(table)
         else:
-            console.print("No commands found.")
+            log.error("No commands found.")
     else:
-        console.print("Commands directory does not exist.")
+        log.error("Commands directory does not exist.")
 
 def execute_command(command_name: str, args):
     if args is None:
@@ -151,12 +207,52 @@ def execute_command(command_name: str, args):
         if os.path.exists(command_file):
             subprocess.run([command_file] + args, check=True)
         else:
-            console.print(f"[bold red]Command 'mcmd {command_name}' not found.[/bold red]")
+            log.error(f"Command 'mcmd {command_name}' not found.")
     except subprocess.CalledProcessError as e:
-        console.print(f"[bold red]Error executing command '{command_name}': {e}[/bold red]")
+        log.error(f"Error executing command '{command_name}': {e}")
     except Exception as e:
-        console.print(f"[bold red]An unexpected error occurred: {e}[/bold red]")
-        console.print(f"[bold yello]Ensure the sebang is added. if not add it at the beggining of the file (#!/bin/bash)[/bold yello]")
+        log.error(f"An unexpected error occurred: {e}")
+
+def export_command(destination_path):
+    if not os.path.exists(MCMD_COMMANDS_DIR):
+        log.error(f"Source directory '{MCMD_COMMANDS_DIR}' does not exist.")
+        return
+    
+    # Ensure destination path exists
+    destination_path += "/mcmd";
+    if not os.path.exists(destination_path):
+        os.makedirs(destination_path)
+    
+    try:
+        # List subfolders in the source directory
+        subfolders = [f for f in os.listdir(MCMD_COMMANDS_DIR) if os.path.isdir(os.path.join(MCMD_COMMANDS_DIR, f))]
+        
+        if subfolders:
+            for cmd in subfolders:
+                src_dir = os.path.join(MCMD_COMMANDS_DIR, cmd)
+                shutil.copytree(src_dir, os.path.join(destination_path, cmd), dirs_exist_ok=True)
+            
+            log.info("All custom commands have been exported successfully.")
+        else:
+            log.warn("No commands found to move.")
+    except Exception as e:
+        log.error(f"Error during export: {e}")
+
+def display_help(command_name: str):
+    """
+    Display the help message for the command, including usage, description, and arguments.
+    """
+    description_file = os.path.join(MCMD_COMMANDS_DIR, command_name, f"{command_name}.desc")
+    if os.path.exists(description_file):
+        with open(description_file, 'r') as file:
+            description = file.read()
+        table = Table(show_header=True, header_style="bold blue")
+        table.add_column("Command", style="dim")
+        table.add_column("Description")
+        table.add_row(f"mcmd exec {command_name}", description)
+        console.print(table)
+    else:
+        log.error(f"Description file for 'mcmd {command_name}' does not exist.")
 
 @app.command()
 def create():
@@ -183,13 +279,22 @@ def exec(
     """
     if command_name:
         if is_valid_command_name(command_name):
-            # If args is None, set it to an empty list
-            execute_command(command_name, args)
+            if args and args[-1] == 'help':
+                display_help(command_name)
+            else:
+                # If args is None, set it to an empty list
+                execute_command(command_name, args)
         else:
-            print("Invalid command name. Command names should only contain alphanumeric characters and underscores.")
+            log.error("Invalid command name. Command names should only contain alphanumeric characters and underscores.")
     else:
-        print("No command provided. Use --help for options.")
+        log.error("No command provided. Use help for options.")
 
+@app.command()
+def export(destination_path: str):
+    """
+    Export all custom commands to the specified destination folder.
+    """
+    export_command(destination_path)
 
 if __name__ == "__main__":
     app()

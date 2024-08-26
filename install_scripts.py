@@ -2,7 +2,9 @@ import os
 import shutil
 import subprocess
 from setuptools.command.install import install
+from app.log_util import Log
 
+log = Log()
 class CustomInstallCommand(install):
     def run(self):
         # Run the standard install process
@@ -26,4 +28,4 @@ class CustomInstallCommand(install):
                 shutil.copy2(s, d)
     
         subprocess.run(['chmod', '-R', '+x', dest_dir])
-        print("************Sample files moved**************")
+        log.warn("************Sample files moved**************")
