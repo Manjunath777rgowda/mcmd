@@ -7,7 +7,7 @@ import shutil
 from rich.console import Console
 from rich.table import Table
 from typing import List, Optional
-from .log_util import Log
+from app.log_util import Log
 
 app = typer.Typer()
 console = Console()
@@ -191,6 +191,7 @@ def list_commands():
                     description = description[:200] + "..."
                 
                 table.add_row(f"mcmd exec {cmd}", description)
+                table.add_row("")  
             console.print(table)
         else:
             log.error("No commands found.")
