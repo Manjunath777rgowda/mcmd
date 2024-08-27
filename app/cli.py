@@ -287,7 +287,7 @@ def read_banner_file(file_path):
 
 def custom_help(ctx: typer.Context, param: typer.Option, value: bool):
     if value:
-        banner_file_path = os.path.join('banner')
+        banner_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'banner')
         banner_content = read_banner_file(banner_file_path)
         console.print(banner_content)
 
