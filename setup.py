@@ -20,5 +20,5 @@ setup(
     python_requires='>=3.6',
     cmdclass={
         'install': CustomInstallCommand,
-    },
+    }
 )

@@ -10,6 +10,7 @@ from typing import List, Optional
 from app.log_util import Log
 import tkinter as tk
 from tkinter import filedialog
+import pkg_resources
 
 app = typer.Typer()
 console = Console()
@@ -276,6 +277,9 @@ def display_help(command_name: str):
     else:
         log.error(f"Description file for 'mcmd {command_name}' does not exist.")
 
+def get_banner_file_path():
+    return pkg_resources.resource_filename(__name__, 'banner.txt')
+
 def read_banner_file(file_path):
     try:
         with open(file_path, 'r') as file:
@@ -285,13 +289,14 @@ def read_banner_file(file_path):
     except Exception as e:
         return f"Error reading banner file: {e}"
 
+def print_banner():
+    banner_file_path = get_banner_file_path()
+    banner_content = read_banner_file(banner_file_path)
+    print(banner_content)
+
 def custom_help(ctx: typer.Context, param: typer.Option, value: bool):
     if value:
-        banner_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'banner.txt')
-        print(banner_file_path)
-        banner_content = read_banner_file(banner_file_path)
-        console.print(banner_content)
-
+        print_banner()
         with console.capture() as capture:
             typer.echo(ctx.get_help())
         help_output = capture.get()
