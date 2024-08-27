@@ -8,10 +8,13 @@ from rich.console import Console
 from rich.table import Table
 from typing import List, Optional
 from app.log_util import Log
+import tkinter as tk
+from tkinter import filedialog
 
 app = typer.Typer()
 console = Console()
 log = Log()
+os.environ['TK_SILENCE_DEPRECATION'] = '1'
 
 # Define the commands directory relative to the current script's location
 MCMD_COMMANDS_DIR = os.path.expanduser("~/.mcmd_commands")
@@ -95,16 +98,26 @@ def create_or_update_command():
         log.error(f"Error creating/updating command: {e}")
 
 def accept_command_details(operation, command_file, command_name):
+    root = tk.Tk()
+    root.withdraw()  # Hide the main window
+
     while True:
         response = get_input("Do you already have the path for the command logic file? (y/n): ").lower()
         if response == 'y':
-            existing_file_path = get_input("Enter the path of the file you want to use as the command logic: ")
-            if os.path.exists(existing_file_path):
-                subprocess.run(['cp', existing_file_path, command_file])
-                add_shebang_if_missing(command_file)
-                log.info(f"Command 'mcmd {command_name}' {operation}d with the contents of {existing_file_path}.")
+            log.info("Please select a .sh file from...")
+            existing_file_path = filedialog.askopenfilename(
+                title="Select a .sh file",
+                filetypes=[("Shell Script Files", "*.sh")]
+            )
+            if existing_file_path:
+                if os.path.exists(existing_file_path):
+                    subprocess.run(['cp', existing_file_path, command_file])
+                    add_shebang_if_missing(command_file)
+                    log.info(f"Command 'mcmd {command_name}' {operation}d with the contents of {existing_file_path}.")
+                else:
+                    log.error(f"File '{existing_file_path}' does not exist. Command {operation} canceled.")
             else:
-                log.error(f"File '{existing_file_path}' does not exist. Command {operation} canceled.")
+                log.error("No file selected. Command {operation} canceled.")
             break
         elif response == 'n':
             log.info(f"Opening vi editor for 'mcmd {command_name}' command logic...")
@@ -214,18 +227,26 @@ def execute_command(command_name: str, args):
     except Exception as e:
         log.error(f"An unexpected error occurred: {e}")
 
-def export_command(destination_path):
+def export_command():
+    root = tk.Tk()
+    root.withdraw()
+
+    log.info("Please select the destination folder...")
+    destination_path = filedialog.askdirectory(title="Choose a destination folder")
+    
+    if not destination_path:
+        log.error("No destination folder selected. Export canceled.")
+        return
+    
+    destination_path = os.path.join(destination_path, "mcmd")
+    if not os.path.exists(destination_path):
+        os.makedirs(destination_path)
+    
     if not os.path.exists(MCMD_COMMANDS_DIR):
         log.error(f"Source directory '{MCMD_COMMANDS_DIR}' does not exist.")
         return
     
-    # Ensure destination path exists
-    destination_path += "/mcmd";
-    if not os.path.exists(destination_path):
-        os.makedirs(destination_path)
-    
     try:
-        # List subfolders in the source directory
         subfolders = [f for f in os.listdir(MCMD_COMMANDS_DIR) if os.path.isdir(os.path.join(MCMD_COMMANDS_DIR, f))]
         
         if subfolders:
@@ -233,7 +254,7 @@ def export_command(destination_path):
                 src_dir = os.path.join(MCMD_COMMANDS_DIR, cmd)
                 shutil.copytree(src_dir, os.path.join(destination_path, cmd), dirs_exist_ok=True)
             
-            log.info("All custom commands have been exported successfully.")
+            log.info(f"All custom commands have been exported successfully to '{destination_path}'.")
         else:
             log.warn("No commands found to move.")
     except Exception as e:
@@ -291,11 +312,11 @@ def exec(
         log.error("No command provided. Use help for options.")
 
 @app.command()
-def export(destination_path: str):
+def export():
     """
-    Export all custom commands to the specified destination folder.
+    Export all custom commands to the selected destination folder.
     """
-    export_command(destination_path)
+    export_command()
 
 if __name__ == "__main__":
     app()
