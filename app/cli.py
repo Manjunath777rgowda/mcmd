@@ -276,6 +276,29 @@ def display_help(command_name: str):
     else:
         log.error(f"Description file for 'mcmd {command_name}' does not exist.")
 
+def read_banner_file(file_path):
+    try:
+        with open(file_path, 'r') as file:
+            return file.read()
+    except FileNotFoundError:
+        return "Banner file not found."
+    except Exception as e:
+        return f"Error reading banner file: {e}"
+
+def custom_help(ctx: typer.Context, param: typer.Option, value: bool):
+    if value:
+        banner_file_path = os.path.join('banner')
+        banner_content = read_banner_file(banner_file_path)
+        console.print(banner_content)
+
+        with console.capture() as capture:
+            typer.echo(ctx.get_help())
+        help_output = capture.get()
+
+        # Print the help output
+        console.print(help_output)
+        ctx.exit()
+
 @app.command()
 def create():
     """Create or update a custom command."""
@@ -317,6 +340,17 @@ def export():
     Export all custom commands to the selected destination folder.
     """
     export_command()
+
+@app.callback(invoke_without_command=True)
+def main(
+    ctx: typer.Context,
+    help: bool = typer.Option(
+        None, "--help", "-h", is_eager=True, callback=custom_help, help="Show this message and exit."
+    ),
+):
+    if ctx.invoked_subcommand is None:
+        console.print("[bold red]No command provided. Use --help to see available commands.[/bold red]")
+        ctx.exit()
 
 if __name__ == "__main__":
     app()
