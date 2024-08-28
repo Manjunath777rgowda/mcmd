@@ -60,8 +60,6 @@ def create_or_update_command():
         log.error("Invalid command name. Command names should only contain alphanumeric characters and underscores.")
         return
 
-    command_description = get_input(f"Enter a description for 'mcmd exec {command_name}': ")
-
     # Define paths for command logic and description files
     command_dir = os.path.join(MCMD_COMMANDS_DIR, command_name)
     command_file = os.path.join(command_dir, f"{command_name}.sh")
@@ -76,6 +74,11 @@ def create_or_update_command():
             response = get_input("Do you want to update it? (y/n): ").lower()
             if response == 'y':
                 log.info(f"Updating command 'mcmd {command_name}'.")
+                command_description = get_input(f"Update a description for 'mcmd exec {command_name}'. (Presss enter to ignore..)").strip()
+                # Only write description if it's not empty
+                if command_description.strip():
+                    with open(description_file, 'w') as file:
+                        file.write(command_description + "\n")
                 accept_command_details("update", command_file, command_name)
                 break
             elif response == 'n':
@@ -87,16 +90,25 @@ def create_or_update_command():
     else:
         log.error(f"Command 'mcmd {command_name}' does not exist.")
         log.info(f"Creating new command 'mcmd {command_name}'.")
+        while True:
+            command_description = get_input(f"Enter a description for 'mcmd exec {command_name}': ").strip()
+            if command_description:
+                try:
+                    with open(description_file, 'w') as file:
+                        file.write(command_description + "\n")
+                    break
+                except Exception as e:
+                    log.error(f"Error saving command description: {e}")
+            else:
+                log.error("Description cannot be empty. Please enter a valid description.")
+        
         accept_command_details("create", command_file, command_name)
 
     try:
-        # Save the command description
-        with open(description_file, 'w') as file:
-            file.write(command_description + "\n")
-        
+        # Make the command file executable
         os.chmod(command_file, 0o755)
     except Exception as e:
-        log.error(f"Error creating/updating command: {e}")
+        log.error(f"Error while changing the permission: {e}")
 
 def accept_command_details(operation, command_file, command_name):
     root = tk.Tk()
