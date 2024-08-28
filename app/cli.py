@@ -149,7 +149,8 @@ def remove_command():
         log.error("No commands found.")
         return
 
-    # Collect commands from subfolders
+    list_commands()
+
     command_items = []
     for root, dirs, files in os.walk(MCMD_COMMANDS_DIR):
         for file in files:
@@ -163,11 +164,6 @@ def remove_command():
     if not command_items:
         log.error("No commands found.")
         return
-
-    # Display commands with their relative paths
-    log.info("Existing commands:")
-    for idx, (cmd_name, rel_path) in enumerate(command_items, start=1):
-        print(f"  {idx}. mcmd {cmd_name}")
 
     try:
         choice = int(get_input("Enter the number of the command to remove: "))
@@ -198,31 +194,45 @@ def remove_command():
         log.error(f"Error removing command: {e}")
         
 def list_commands():
-    if os.path.exists(MCMD_COMMANDS_DIR):
-        subfolders = [f for f in os.listdir(MCMD_COMMANDS_DIR) if os.path.isdir(os.path.join(MCMD_COMMANDS_DIR, f))]
-        if subfolders:
-            log.warn("CUSTOM COMMANDS:")
-            table = Table(show_header=True, header_style="bold blue")
-            table.add_column("Command", style="dim")
-            table.add_column("Description")
-            for cmd in subfolders:
-                command_dir = os.path.join(MCMD_COMMANDS_DIR, cmd)
-                desc_file = os.path.join(command_dir, f"{cmd}.desc")
-                description = ""
-                if os.path.exists(desc_file):
-                    with open(desc_file, 'r') as file:
-                        description = file.read().strip()
-                
-                if len(description) > 200:
-                    description = description[:200] + "..."
-                
-                table.add_row(f"mcmd exec {cmd}", description)
-                table.add_row("")  
-            console.print(table)
-        else:
-            log.error("No commands found.")
-    else:
+    if not os.path.exists(MCMD_COMMANDS_DIR):
         log.error("Commands directory does not exist.")
+        return
+
+    command_items = []
+    for root, dirs, files in os.walk(MCMD_COMMANDS_DIR):
+        for file in files:
+            if file.endswith('.sh'):
+                command_name = file[:-3]
+                command_path = os.path.join(root, file)
+                # Get the relative path to use for listing commands
+                relative_path = os.path.relpath(command_path, MCMD_COMMANDS_DIR)
+                command_items.append((command_name, relative_path))
+
+    if not command_items:
+        log.error("No commands found.")
+        return
+    
+    log.warn("CUSTOM COMMANDS:")
+    table = Table(show_header=True, header_style="bold blue")
+    table.add_column("No.", style="dim")
+    table.add_column("Command", style="dim")
+    table.add_column("Description")
+
+    for index, (cmd_name, rel_path) in enumerate(command_items, start=1):
+        command_dir = os.path.dirname(os.path.join(MCMD_COMMANDS_DIR, rel_path))
+        desc_file = os.path.join(command_dir, f"{cmd_name}.desc")
+        description = ""
+        
+        if os.path.exists(desc_file):
+            with open(desc_file, 'r') as file:
+                description = file.read().strip()
+            
+            if len(description) > 200:
+                description = description[:200] + "..."
+        
+        table.add_row(str(index), f"mcmd exec {cmd_name}", description)
+        table.add_row("")  
+    console.print(table)
 
 def execute_command(command_name: str, args):
     if args is None:
