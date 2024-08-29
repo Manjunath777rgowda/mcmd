@@ -1,0 +1,14 @@
+{
+  "MCMD_COMMANDS_DIR": {
+    "value": "~/.mcmd_commands",
+    "description": "Command repository folder"
+  },
+  "MCMD_EXPORT_DIR": {
+    "value": "",
+    "description": "Commands will be exported by default to this folder"
+  },
+  "ENABLE_AUTO_EXPORT": {
+    "value": false,
+    "description": "Commands will be exported automatically on create"
+  }
+}
