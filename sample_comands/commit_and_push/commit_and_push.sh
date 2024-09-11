@@ -1,7 +1,9 @@
 #!/bin/bash
 
+source  ~/.mcmd_commands/utility/logger.sh
+
 # Unstage all changes
-echo "Unstaging all changes..."
+print_warn "Unstaging all changes..."
 git reset
 
 # Check for modified, unversioned, and staged files
@@ -13,60 +15,60 @@ staged_files=$(git status --porcelain | grep '^A ' | awk '{print $2}')
 all_files="$modified_files $unversioned_files $staged_files"
 
 if [ -z "$all_files" ]; then
-  echo "No modified, unversioned, or staged files found."
+  print_warn "No modified, unversioned, or staged files found."
 else
-  echo "Files found:"
+  print_log "Files found:"
   echo "$all_files"
   
   for file in $all_files; do
-    echo "Do you want to add $file to the staging area? (y/n)"
+    promt "Do you want to add $file to the staging area? (y/n)"
     read -r add_file
     if [ "$add_file" = "y" ]; then
-      echo "Adding $file"
+      print_log "Adding $file"
       git add "$file"
     elif [ "$add_file" = "n" ]; then
       if git diff --cached --name-only | grep -q "$file"; then
-        echo "Removing $file from staging area"
+        print_log "Removing $file from staging area"
         git reset "$file"
       else
-        echo "$file is not staged, skipping removal."
+        print_log "$file is not staged, skipping removal."
       fi
     else
-      echo "Invalid input. Please enter 'y' or 'n'."
+      print_error "Invalid input. Please enter 'y' or 'n'."
       exit 1
     fi
   done
 fi
 
 # Confirm commit
-echo "Do you want to commit the changes? (y/n)"
+promt "Do you want to commit the changes? (y/n)"
 read -r commit_confirm
 if [ "$commit_confirm" != "y" ]; then
-  echo "Aborting commit."
+  print_error "Aborting commit."
   exit 1
 fi
 
 # Commit changes
-echo "Enter commit message:"
+promt "Enter commit message:"
 read -r commit_message
 
 if [ -z "$commit_message" ]; then
-  echo "Commit message cannot be empty. Aborting commit."
+  print_error "Commit message cannot be empty. Aborting commit."
   exit 1
 fi
 
 git commit -m "$commit_message"
 
 # Confirm push
-echo "Do you want to push the changes to the remote repository? (y/n)"
+promt "Do you want to push the changes to the remote repository? (y/n)"
 read -r push_confirm
 if [ "$push_confirm" != "y" ]; then
-  echo "Commit completed, but not pushing. Exiting."
+  print_log "Commit completed, but not pushing. Exiting."
   exit 0
 fi
 
 # Push changes
-echo "Pushing changes to remote repository..."
+print_log "Pushing changes to remote repository..."
 git push
 
-echo "Commit and push completed."
+print_centered "Commit and push completed." "-"

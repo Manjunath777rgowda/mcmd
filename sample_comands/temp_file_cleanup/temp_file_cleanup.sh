@@ -1,15 +1,13 @@
 #!/bin/bash
 
+source  ~/.mcmd_commands/utility/logger.sh
+
 # Define directories
 TEMP_DIR="$HOME/Library/Caches"
 LOG_DIR="$HOME/Library/Logs"
 
-# ANSI escape codes for red text
-RED='\033[0;31m'
-NC='\033[0m' # No Color
-
 # Notify the user about OS compatibility
-echo -e "${RED}Note: This script is only supported on macOS.${NC}"
+print_error "Note: This script is only supported on macOS."
 
 # Remove temporary files
 find "$TEMP_DIR" -type f -name "*.tmp" -delete
@@ -18,4 +16,4 @@ find "$TEMP_DIR" -type f -name "*.tmp" -delete
 find "$LOG_DIR" -type f -name "*.log" -mtime +30 -delete
 
 # Notify the user
-echo "Temporary files and old logs removed."
+print_log "Temporary files and old logs removed."
