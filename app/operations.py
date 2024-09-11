@@ -235,6 +235,7 @@ def list_commands():
             
             if len(description) > 200:
                 description = description[:200] + "..."
+        else: continue
         
         table.add_row(str(index), f"mcmd exec {cmd_name}", description)
         table.add_row("")  
