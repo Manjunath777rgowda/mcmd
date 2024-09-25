@@ -1,9 +1,9 @@
 #!/bin/bash
-
+set -e
 # -------------------------------------------------------------------------------------------
 # This script help to run in the editable mode where you can develop and test at the run time
 # -------------------------------------------------------------------------------------------
-pip uninstall mcmd
+pip3 uninstall mcmd
 rm -rf build dist *egg* __pycache__ 
 python setup.py sdist bdist_wheel
-pip install -e .
+pip3 install -e .
