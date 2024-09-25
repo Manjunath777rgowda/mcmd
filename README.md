@@ -71,21 +71,34 @@ mcmd --help
 ```
 
 ```plaintext
-Usage: mcmd [OPTIONS] COMMAND [ARGS]...
 
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────╮
-│ --install-completion          Install completion for the current shell.                     │
-│ --show-completion             Show completion for the current shell, to copy it or          │
-│                               customize the installation.                                   │
-│ --help                        Show this message and exit.                                   │
-╰─────────────────────────────────────────────────────────────────────────────────────────────╯
-╭─ Commands ──────────────────────────────────────────────────────────────────────────────────╮
-│ create   Create or update a custom command.                                                 │
-│ exec     Entry point to execute custom commands if no other command is specified.           |
-│ export   Export all custom commands to the specified destination folder.                    |
-│ list     List all custom commands.                                                          │
-│ remove   Remove a custom command.                                                           │
-╰─────────────────────────────────────────────────────────────────────────────────────────────╯
+    ******************************************                            
+    *        __  __  ____ __  __ ____        *
+    *       |  \/  |/ ___|  \/  |  _ \       *
+    *       | |\/| | |   | |\/| | | | |      *
+    *       | |  | | |___| |  | | |_| |      *
+    *       |_|  |_|\____|_|  |_|____/       *
+    *                                        *
+    *         Welcome to mcmd Tool           *
+    *   Create and Manage your commands!     *
+    ******************************************                            
+                                                                                                                          
+ Usage: mcmd [OPTIONS] COMMAND [ARGS]...                                                                                  
+                                                                                                                          
+╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --help                -h        Show this message and exit.                                                            │
+│ --install-completion            Install completion for the current shell.                                              │
+│ --show-completion               Show completion for the current shell, to copy it or customize the installation.       │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ─────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ create    Create or update a custom command.                                                                           │
+│ exec      Entry point to execute custom commands if no other command is specified.                                     │
+│ export    Export all custom commands to the selected destination folder.                                               │
+│ list      List all custom command.                                                                                     │
+│ remove    Remove custom command.                                                                                       │
+│ setting   List and edit the settings                                                                                   │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
 ```
 
 ### Command Descriptions
