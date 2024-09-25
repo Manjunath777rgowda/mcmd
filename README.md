@@ -51,7 +51,7 @@ By using `mcmd`, you can enhance your productivity, reduce repetitive tasks, and
 If you have an existing installation of `mcmd`, you can uninstall it with the following command:
 
 ```bash
-pip uninstall mcmd
+pip3 uninstall mcmd
 ```
 
 ## Installing mcmd
@@ -59,7 +59,7 @@ pip uninstall mcmd
 To install the latest version of `mcmd` directly from the GitHub repository, use the following command:
 
 ```bash
-pip install git+https://github.com/Manjunath777rgowda/mcmd.git
+bash <(curl -s https://raw.githubusercontent.com/Manjunath777rgowda/mcmd/main/install.sh)
 ```
 
 ## Usage
