@@ -62,6 +62,8 @@ To install the latest version of `mcmd` directly from the GitHub repository, use
 bash <(curl -s https://raw.githubusercontent.com/Manjunath777rgowda/mcmd/main/install.sh)
 ```
 
+### `Note: If the installation fails, please open a new terminal tab and try again.`
+
 ## Usage
 
 Once installed, you can use the `mcmd` command. Below is the help message for `mcmd`:
