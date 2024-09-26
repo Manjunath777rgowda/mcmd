@@ -11,7 +11,6 @@ class CustomInstallCommand(install):
     def run(self):
         # Run the standard install process
         super().run()
-        compare_and_update_settings(get_settings("MCMD_COMMANDS_DIR","settings"),"settings")
 
         src_dir = os.path.abspath('sample_comands')
         setting_dir=os.path.abspath('settings')
@@ -19,7 +18,10 @@ class CustomInstallCommand(install):
 
         # Create destination directory if it doesn't exist
         if not os.path.exists(dest_dir):
-            os.makedirs(dest_dir)
+            os.makedirs(dest_dir)        
+            shutil.copy2(setting_dir+"/settings.json", dest_dir)
+
+        compare_and_update_settings(get_settings("MCMD_COMMANDS_DIR","settings"),"settings")
         
         # Copy all contents from source to destination
         for item in os.listdir(src_dir):
@@ -29,6 +31,6 @@ class CustomInstallCommand(install):
                 shutil.copytree(s, d, dirs_exist_ok=True)
             else:
                 shutil.copy2(s, d)
-    
+        
         subprocess.run(['chmod', '-R', '+x', dest_dir])
         log.warn("************Sample commands moved**************")
