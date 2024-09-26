@@ -45,6 +45,29 @@ print_centered() {
     printf "\n\033[0m"
 }
 
+
+add_line() {
+    PROFILE_FILE="$1"
+    LINE_TO_MANAGE="$2"
+
+    if [ ! -f "$PROFILE_FILE" ]; then
+        print_error "File $PROFILE_FILE does not exist"
+        exit 1
+    fi
+
+   
+    if grep -qxF "$LINE_TO_MANAGE" "$PROFILE_FILE"; then
+        print_warn "Line already exists in $PROFILE_FILE."
+    else
+        echo >> "$PROFILE_FILE"
+        echo "$LINE_TO_MANAGE" >> "$PROFILE_FILE"
+        print_log "Line added to $PROFILE_FILE."
+    fi
+
+    rm -rf $BACKUP_FILE
+    source $PROFILE_FILE
+}
+
 # Function to check if a command exists
 command_exists() {
     command -v "$1" >/dev/null 2>&1
@@ -54,6 +77,15 @@ command_exists() {
 if ! command_exists brew; then
     print_warn "Homebrew is not installed. Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    for PROFILE in ~/.bash_profile ~/.zshrc ~/.bashrc ~/.zprofile; do
+        if [ -f "$PROFILE" ]; then
+            add_line $PROFILE 'export PATH="/opt/homebrew/bin:$PATH"'
+            add_line $PROFILE 'eval "$(/opt/homebrew/bin/brew shellenv)"'
+            source $PROFILE
+        else
+            echo "$PROFILE does not exist, skipping..."
+        fi
+    done
 else
     print_log "Homebrew is already installed."
 fi
@@ -62,6 +94,15 @@ fi
 if ! command_exists python3; then
     print_warn "Python 3 is not installed. Installing..."
     brew install python
+    for PROFILE in ~/.bash_profile ~/.zshrc ~/.bashrc ~/.zprofile; do
+        if [ -f "$PROFILE" ]; then
+            add_line $PROFILE 'export PATH="/usr/local/bin:$PATH"'
+            source $PROFILE
+        else
+            echo "$PROFILE does not exist, skipping..."
+        fi
+    done
+
 else
     print_warn "Python 3 is already installed."
 fi
