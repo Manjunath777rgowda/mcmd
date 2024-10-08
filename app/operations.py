@@ -338,7 +338,7 @@ def imports(import_dir):
             return
     
         if is_git_repo(import_dir):
-            log.info(f"{import_dir} is a git repository")
+            log.info(f"{import_dir} is a git repository.")
             changes = get_git_status(import_dir)
             
             if changes:
@@ -351,6 +351,7 @@ def imports(import_dir):
             log.warn(f"'{import_path}' is not a Git repository.")
         
         shutil.copytree(import_path, MCMD_COMMANDS_DIR, dirs_exist_ok=True)
+        log.info(f"Imported Successfully from '{import_path}'")
     except Exception as e:
         log.error(f"Error during export: {e}")
 
