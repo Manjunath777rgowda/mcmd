@@ -5,5 +5,5 @@ set -e
 # -------------------------------------------------------------------------------------------
 pip3 uninstall mcmd
 rm -rf build dist *egg* __pycache__ 
-python setup.py sdist bdist_wheel
+python setup.py sdist
 pip3 install -e .

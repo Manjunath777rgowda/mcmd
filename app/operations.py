@@ -112,7 +112,7 @@ def auto_export():
         if get_settings("ENABLE_AUTO_EXPORT"):
             export_dir = get_settings("MCMD_EXPORT_DIR")
             if export_dir:
-                export_command(export_dir)
+                export(export_dir)
     except Exception as e:
         log.error(f"Error while performing auto export : {e}")
 
@@ -257,7 +257,32 @@ def execute_command(command_name: str, args):
     except Exception as e:
         log.error(f"An unexpected error occurred: {e}")
 
-def export_command(destination_path):
+def export_commands():
+    export_dir = get_settings("MCMD_EXPORT_DIR")
+    if export_dir:
+        while True:
+            response = get_input("Do you want to export to default location (y/n): ").lower()
+            if response == 'y':
+                export(export_dir)
+                break
+            elif response == 'n':
+                root = tk.Tk()
+                root.withdraw()
+
+                log.info("Please select the destination folder...")
+                destination_path = filedialog.askdirectory(title="Choose a destination folder")
+                
+                if not destination_path:
+                    log.error("No destination folder selected. Export canceled.")
+                    return
+                
+                export(export_dir)
+                break
+            else:
+                log.error("Invalid input. Please enter 'y' or 'n'.")
+                continue   
+
+def export(destination_path):
     
     destination_path = os.path.join(destination_path, "mcmd")
     if not os.path.exists(destination_path):
@@ -280,6 +305,72 @@ def export_command(destination_path):
     except Exception as e:
         log.error(f"Error during export: {e}")
 
+def import_commands():
+    import_dir = get_settings("MCMD_EXPORT_DIR")
+    if import_dir:
+        while True:
+            response = get_input("Do you want to import from default location (y/n): ").lower()
+            if response == 'y':
+                imports(import_dir)
+                break
+            elif response == 'n':
+                root = tk.Tk()
+                root.withdraw()
+
+                log.info("Please select the folder...")
+                destination_path = filedialog.askdirectory(title="Choose a folder")
+                
+                if not destination_path:
+                    log.error("No folder selected. Export canceled.")
+                    return
+                
+                imports(import_dir)
+                break
+            else:
+                log.error("Invalid input. Please enter 'y' or 'n'.")
+                continue   
+
+def imports(import_dir):
+    try:
+        import_path = os.path.join(import_dir, "mcmd")
+        if not os.path.exists(import_path):
+            log.error(f"Invalid Directory '{import_path}' does not exist.")
+            return
+    
+        if is_git_repo(import_dir):
+            log.info(f"{import_dir} is a git repository")
+            changes = get_git_status(import_dir)
+            
+            if changes:
+                log.error("Uncommitted changes detected:")
+                log.error(changes)
+                log.info("Please commit the changes before import...")
+                return
+        
+        else:
+            log.warn(f"'{import_path}' is not a Git repository.")
+        
+        shutil.copytree(import_path, MCMD_COMMANDS_DIR, dirs_exist_ok=True)
+    except Exception as e:
+        log.error(f"Error during export: {e}")
+
+def is_git_repo(path):
+    return os.path.isdir(os.path.join(path, '.git'))
+
+def get_git_status(path):
+    try:
+        result = subprocess.run(
+            ['git', 'status', '--porcelain'], 
+            cwd=path, 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE, 
+            text=True
+        )
+        # If there's any output, there are changes
+        return result.stdout.strip()
+    except subprocess.CalledProcessError:
+        return None
+    
 def display_help(command_name: str):
     """
     Display the help message for the command, including usage, description, and arguments.

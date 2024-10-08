@@ -54,19 +54,16 @@ def exec(
 @app.command()
 def export():
     """
-    Export all custom commands to the selected destination folder.
+    Export custom commands to the default folder else selected destination folder from the command repo.
     """
-    root = tk.Tk()
-    root.withdraw()
+    export_commands()
 
-    log.info("Please select the destination folder...")
-    destination_path = filedialog.askdirectory(title="Choose a destination folder")
-    
-    if not destination_path:
-        log.error("No destination folder selected. Export canceled.")
-        return
-   
-    export_command(destination_path)
+@app.command()
+def imports():
+    """
+    Import custom commands from the default folder else selected destination folder to the command repo.
+    """
+    import_commands()
 
 @app.callback(invoke_without_command=True)
 def main(
