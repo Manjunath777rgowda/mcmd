@@ -276,7 +276,7 @@ def export_commands():
                     log.error("No destination folder selected. Export canceled.")
                     return
                 
-                export(export_dir)
+                export(destination_path)
                 break
             else:
                 log.error("Invalid input. Please enter 'y' or 'n'.")
@@ -324,7 +324,7 @@ def import_commands():
                     log.error("No folder selected. Export canceled.")
                     return
                 
-                imports(import_dir)
+                imports(destination_path)
                 break
             else:
                 log.error("Invalid input. Please enter 'y' or 'n'.")
