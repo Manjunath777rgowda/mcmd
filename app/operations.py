@@ -346,7 +346,14 @@ def imports(import_dir):
                 log.error(changes)
                 log.info("Please commit the changes before import...")
                 return
-        
+            else:
+                result = subprocess.run(['git', 'pull'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+                if result.returncode == 0:
+                    log.info(f"Successfully pulled latest changes in {import_dir}")
+                else:
+                    log.warn(f"Error pulling changes in {import_dir}: {result.stderr}")
+                
         else:
             log.warn(f"'{import_path}' is not a Git repository.")
         
